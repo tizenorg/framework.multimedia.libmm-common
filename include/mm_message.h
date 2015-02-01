@@ -75,6 +75,9 @@ enum MMMessageType {
 	MM_MESSAGE_PD_DOWNLOADER_START,	/**< PD downloader start message */
 	MM_MESSAGE_PD_DOWNLOADER_END,		/**< PD downloader end message */
 	MM_MESSAGE_IMAGE_BUFFER,        /**< hls image buffer message type */
+	MM_MESSAGE_DRM_NO_LICENSE,			/**< No license */
+	MM_MESSAGE_DRM_EXPIRED,				/**< Expired license */
+	MM_MESSAGE_DRM_FUTURE_USE,			/**< License for future use */
 
 	/* CAMCORDER */
 	MM_MESSAGE_CAMCORDER_STATE_CHANGED = 0x200,	/**< State changed.*/
@@ -101,10 +104,14 @@ enum MMMessageType {
 	/* RADIO */
 	MM_MESSAGE_RADIO_SCAN_START = 0x300,		/**< Radio frequency scanning initiated */
 	MM_MESSAGE_RADIO_SCAN_INFO,			/**< Founded radio frequency report. check message parameters  */
-	MM_MESSAGE_RADIO_SCAN_FINISH, 			/**< Radio frequency scanning has finished */
+	MM_MESSAGE_RADIO_SCAN_FINISH,			/**< Radio frequency scanning has finished */
 	MM_MESSAGE_RADIO_SCAN_STOP,			/**< Radio frequency scanning has stopped */
 	MM_MESSAGE_RADIO_SEEK_START,			/**< Radio seeking has established */
-	MM_MESSAGE_RADIO_SEEK_FINISH, 			/**< Radio seeking has finished */
+	MM_MESSAGE_RADIO_SEEK_FINISH,			/**< Radio seeking has finished */
+	MM_MESSAGE_RADIO_SET_FREQUENCY,			/**< Radio set frequency async*/
+	MM_MESSAGE_RADIO_RDS_PS,			/**< Radio RDS Program Service Data has arrived> */
+	MM_MESSAGE_RADIO_RDS_RT,			/**< Radio RDS Radio Text Data has arrived> */
+
 
 	/* MEDIA CALL */
 	MM_MESSAGE_MEDIACALL_RESERVED = 0x400,		/**< Reserved message for Media Call */
@@ -153,6 +160,7 @@ enum MMMessageUnionType {
 enum MMMessageInterruptedCode {
 	MM_MSG_CODE_INTERRUPTED_BY_MEDIA = 0,
 	MM_MSG_CODE_INTERRUPTED_BY_CALL_START,
+	MM_MSG_CODE_INTERRUPTED_BY_CALL_END,
 	MM_MSG_CODE_INTERRUPTED_BY_EARJACK_UNPLUG,
 	MM_MSG_CODE_INTERRUPTED_BY_RESOURCE_CONFLICT,
 	MM_MSG_CODE_INTERRUPTED_BY_ALARM_START,
@@ -271,6 +279,14 @@ typedef struct {
 		struct {
 			int frequency;                  /**< detected active frequency with MM_MESSAGE_RADIO_SCAN_INFO */
 		} radio_scan;
+
+/**
+ * Radio RDS PS and RT Info
+ */
+		struct {
+			int frequency;                /**< The frequency at which the RDS data was obtained> */
+			char* rt_ps;                  /**< the radio text obtained with MM_MESSAGE_RADIO_RDS_PS and MM_MESSAGE_RADIO_RDS_RT */
+		} radio_rds_text;
 /**
  * Recording status
  */
@@ -292,6 +308,15 @@ typedef struct {
 			void * consumed_buffer;
 
 		} consumed_mediabuffer;
+
+	/**
+	 * Video frame capture
+	 */
+		struct {
+			unsigned int width; 					/* width of captured image */
+			unsigned int height;					/* height of captured image */
+			unsigned int orientation;				/* orientation of captured image */
+		} captured_frame;
 	};
 
 	int size;       /**< Allocated size of 'data' */

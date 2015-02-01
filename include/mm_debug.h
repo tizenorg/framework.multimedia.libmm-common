@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  */
- 
+
 
 
 /* ===========================================================================================
@@ -93,78 +93,30 @@ enum {
  */
 #include <mm_log.h>
 
-#define mmf_debug(type, fmt, arg...)	\
-	{	\
-		switch (type) {	\
-			case MMF_DEBUG_VERBOSE:	\
-				log_print_rel(MMF_LOG_OWNER, LOG_CLASS_VERBOSE, fmt, ##arg);	\
-				break;	\
-			case MMF_DEBUG_LOG:	\
-				log_print_rel(MMF_LOG_OWNER, LOG_CLASS_DEBUG, fmt, ##arg);	\
-				break;	\
-			case MMF_DEBUG_INFO: \
-				log_print_rel(MMF_LOG_OWNER, LOG_CLASS_INFO, fmt, ##arg);	\
-				break;	\
-			case MMF_DEBUG_WARNING:	\
-				log_print_rel(MMF_LOG_OWNER, LOG_CLASS_WARNING, fmt, ##arg);	\
-				break;	\
-			case MMF_DEBUG_ERROR:	\
-				log_print_rel(MMF_LOG_OWNER, LOG_CLASS_ERR, fmt, ##arg);	\
-				break;	\
-			case MMF_DEBUG_CRITICAL:	\
-				log_print_rel(MMF_LOG_OWNER, LOG_CLASS_CRITICAL, fmt, ##arg);	\
-				break;	\
-		}	\
-	}
-
-#define mmf_secure_debug(type, fmt, arg...)	\
-	{	\
-		switch (type) {	\
-			case MMF_DEBUG_VERBOSE:	\
-				secure_log_print_rel(MMF_LOG_OWNER, LOG_CLASS_VERBOSE, fmt, ##arg);	\
-				break;	\
-			case MMF_DEBUG_LOG:	\
-				secure_log_print_rel(MMF_LOG_OWNER, LOG_CLASS_DEBUG, fmt, ##arg);	\
-				break;	\
-			case MMF_DEBUG_INFO: \
-				secure_log_print_rel(MMF_LOG_OWNER, LOG_CLASS_INFO, fmt, ##arg);	\
-				break;	\
-			case MMF_DEBUG_WARNING:	\
-				secure_log_print_rel(MMF_LOG_OWNER, LOG_CLASS_WARNING, fmt, ##arg);	\
-				break;	\
-			case MMF_DEBUG_ERROR:	\
-				secure_log_print_rel(MMF_LOG_OWNER, LOG_CLASS_ERR, fmt, ##arg);	\
-				break;	\
-			case MMF_DEBUG_CRITICAL:	\
-				secure_log_print_rel(MMF_LOG_OWNER, LOG_CLASS_CRITICAL, fmt, ##arg);	\
-				break;	\
-		}	\
-	}
-
 /******************************************************************************
  *
  *	DEBUG FUNCTION MACROS
  *
  *****************************************************************************/
-#define debug_verbose(fmt, arg...)	mmf_debug(MMF_DEBUG_VERBOSE, fmt, ##arg)
-#define debug_log(fmt, arg...)		mmf_debug(MMF_DEBUG_LOG, fmt, ##arg)
-#define debug_msg(fmt, arg...)		mmf_debug(MMF_DEBUG_INFO, fmt, ##arg)
-#define debug_warning(fmt, arg...)	mmf_debug(MMF_DEBUG_WARNING, fmt, ##arg)
-#define debug_error(fmt, arg...)	mmf_debug(MMF_DEBUG_ERROR, fmt, ##arg)
-#define debug_critical(fmt, arg...)	mmf_debug(MMF_DEBUG_CRITICAL, fmt, ##arg)
-#define debug_profile(fmt, arg...)	mmf_debug(MMF_DEBUG_PROFILE,	"<TIMER> " fmt, ##arg)
-#define debug_fenter()				mmf_debug(MMF_DEBUG_LOG, 		"<ENTER> \n")
-#define debug_fleave()				mmf_debug(MMF_DEBUG_LOG, 		"<LEAVE> \n")
-#define debug_enter(fmt, arg...)	mmf_debug(MMF_DEBUG_LOG,		"<ENTER> [<---] " fmt, ##arg)
-#define debug_leave(fmt, arg...)	mmf_debug(MMF_DEBUG_LOG,		"<LEAVE> [--->] " fmt, ##arg)
+#define debug_verbose(fmt, arg...)	mm_log_by_owner(MMF_LOG_OWNER, LOG_VERBOSE, fmt, ##arg)
+#define debug_log(fmt, arg...)		mm_log_by_owner(MMF_LOG_OWNER, LOG_DEBUG, fmt, ##arg)
+#define debug_msg(fmt, arg...)	mm_log_by_owner(MMF_LOG_OWNER, LOG_INFO, fmt, ##arg)
+#define debug_warning(fmt, arg...)	mm_log_by_owner(MMF_LOG_OWNER, LOG_WARN, fmt, ##arg)
+#define debug_error(fmt, arg...)	mm_log_by_owner(MMF_LOG_OWNER, LOG_ERROR, fmt, ##arg)
+#define debug_critical(fmt, arg...)	mm_log_by_owner(MMF_LOG_OWNER, LOG_FATAL, fmt, ##arg)
+#define debug_profile(fmt, arg...)	mm_log_by_owner(MMF_LOG_OWNER, LOG_DEBUG,"<TIMER> " fmt, ##arg)
+#define debug_fenter()			mm_log_by_owner(MMF_LOG_OWNER, LOG_DEBUG, "<ENTER> \n")
+#define debug_fleave()			mm_log_by_owner(MMF_LOG_OWNER, LOG_DEBUG, "<LEAVE> \n")
+#define debug_enter(fmt, arg...)	mm_log_by_owner(MMF_LOG_OWNER, LOG_DEBUG,"<ENTER> [<---] " fmt, ##arg)
+#define debug_leave(fmt, arg...)	mm_log_by_owner(MMF_LOG_OWNER, LOG_DEBUG,"<LEAVE> [--->] " fmt, ##arg)
 
-#define secure_debug_verbose(fmt, arg...)	mmf_secure_debug(MMF_DEBUG_VERBOSE, fmt, ##arg)
-#define secure_debug_log(fmt, arg...)		mmf_secure_debug(MMF_DEBUG_LOG, fmt, ##arg)
-#define secure_debug_msg(fmt, arg...)		mmf_secure_debug(MMF_DEBUG_INFO, fmt, ##arg)
-#define secure_debug_warning(fmt, arg...)	mmf_secure_debug(MMF_DEBUG_WARNING, fmt, ##arg)
-#define secure_debug_error(fmt, arg...)	mmf_secure_debug(MMF_DEBUG_ERROR, fmt, ##arg)
-#define secure_debug_critical(fmt, arg...)	mmf_secure_debug(MMF_DEBUG_CRITICAL, fmt, ##arg)
-#define secure_debug_profile(fmt, arg...)	mmf_secure_debug(MMF_DEBUG_PROFILE,	"<TIMER> " fmt, ##arg)
+#define secure_debug_verbose(fmt, arg...)	mm_secure_log_by_owner(MMF_LOG_OWNER, LOG_VERBOSE, fmt, ##arg)
+#define secure_debug_log(fmt, arg...)		mm_secure_log_by_owner(MMF_LOG_OWNER, LOG_DEBUG, fmt, ##arg)
+#define secure_debug_msg(fmt, arg...)		mm_secure_log_by_owner(MMF_LOG_OWNER, LOG_INFO, fmt, ##arg)
+#define secure_debug_warning(fmt, arg...)	mm_secure_log_by_owner(MMF_LOG_OWNER, LOG_WARN, fmt, ##arg)
+#define secure_debug_error(fmt, arg...)		mm_secure_log_by_owner(MMF_LOG_OWNER, LOG_ERROR, fmt, ##arg)
+#define secure_debug_critical(fmt, arg...)		mm_secure_log_by_owner(MMF_LOG_OWNER, LOG_FATAL, fmt, ##arg)
+#define secure_debug_profile(fmt, arg...)		mm_secure_log_by_owner(MMF_LOG_OWNER, LOG_DEBUG, "<TIMER> " fmt, ##arg)
 
 #define return_if_fail(expr)	\
 	if(!(expr)) {	\

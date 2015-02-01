@@ -1,12 +1,7 @@
 Name:       libmm-common
 Summary:    Multimedia Framework Common Lib
-%if 0%{?tizen_profile_mobile}
-Version:    0.2.55
+Version:    0.2.84
 Release:    0
-%else
-Version:    0.3.1
-Release:    0
-%endif
 Group:      TO_BE/FILLED_IN
 License:    Apache-2.0
 Source0:    %{name}-%{version}.tar.gz
@@ -30,34 +25,16 @@ Multimedia Framework Common Library (devel)
 %prep
 %setup -q
 
-%if 0%{?tizen_profile_wearable}
-cd wearable
-%else
-cd mobile
-%endif
 ./autogen.sh
 CFLAGS="%{optflags} -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" " ./configure --prefix=%{_prefix} ; export CFLAGS
 
 %build
+export CFLAGS+=" -Wall -Wcast-align -Wcast-qual -Wextra -Wno-array-bounds -Wno-empty-body -Wno-ignored-qualifiers -Wno-unused-parameter -Wshadow -Wwrite-strings -Wswitch-default -Wno-unused-but-set-parameter -Wno-unused-but-set-variable"
 
-
-%if 0%{?tizen_profile_wearable}
-cd wearable
-%else
-cd mobile
-%endif
 make %{?jobs:-j%jobs}
 
 %install
-
-%if 0%{?tizen_profile_wearable}
-cd wearable
-%else
-cd mobile
-%endif
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/usr/share/license
-cp LICENSE.APLv2 %{buildroot}/usr/share/license/%{name}
 %make_install
 
 
@@ -67,15 +44,9 @@ cp LICENSE.APLv2 %{buildroot}/usr/share/license/%{name}
 
 
 %files
-
-%if 0%{?tizen_profile_wearable}
-%manifest wearable/libmm-common.manifest
-%else
-%manifest mobile/libmm-common.manifest
-%endif
+%manifest libmm-common.manifest
 %defattr(-,root,root,-)
 %{_libdir}/libmmfcommon.so.*
-%{_datadir}/license/%{name}
 
 
 %files devel
