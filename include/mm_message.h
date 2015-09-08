@@ -19,7 +19,7 @@
  *
  */
 
- 
+
 #ifndef __MM_MESSAGE_H__
 #define	__MM_MESSAGE_H__
 
@@ -74,6 +74,10 @@ enum MMMessageType {
 	MM_MESSAGE_SEEK_COMPLETED,			/**< Seek completed */
 	MM_MESSAGE_PD_DOWNLOADER_START,	/**< PD downloader start message */
 	MM_MESSAGE_PD_DOWNLOADER_END,		/**< PD downloader end message */
+	MM_MESSAGE_IMAGE_BUFFER,        /**< hls image buffer message type */
+	MM_MESSAGE_DRM_NO_LICENSE,			/**< No license */
+	MM_MESSAGE_DRM_EXPIRED,				/**< Expired license */
+	MM_MESSAGE_DRM_FUTURE_USE,			/**< License for future use */
 
 	/* CAMCORDER */
 	MM_MESSAGE_CAMCORDER_STATE_CHANGED = 0x200,	/**< State changed.*/
@@ -81,7 +85,7 @@ enum MMMessageType {
 	MM_MESSAGE_CAMCORDER_MAX_SIZE,			/**< Maximum size, camcorder waits for user's order (cam_commit/cancel).*/
 	MM_MESSAGE_CAMCORDER_NO_FREE_SPACE,		/**< No free space, camcorder waits for user's order (cam_commit/cancel).*/
 	MM_MESSAGE_CAMCORDER_TIME_LIMIT,		/**< Time limit, camcorder waits for user's order (cam_commit/cancel)*/
-	MM_MESSAGE_CAMCORDER_CAPTURED,			/**< Image/audio/video captured.*/
+	MM_MESSAGE_CAMCORDER_CAPTURED,			/**< Image captured */
 	MM_MESSAGE_CAMCORDER_ERROR,			/**< Error occurred.*/
 	MM_MESSAGE_CAMCORDER_FOCUS_CHANGED,		/**< Focus changed */
 	MM_MESSAGE_CAMCORDER_CURRENT_VOLUME,		/**< Current volume level of real input stream */
@@ -91,14 +95,23 @@ enum MMMessageType {
 	MM_MESSAGE_CAMCORDER_VIDEO_SNAPSHOT_CAPTURED,	/**< Image captured while video recording */
 	MM_MESSAGE_CAMCORDER_HDR_PROGRESS,		/**< Progressing percent of HDR capture */
 	MM_MESSAGE_CAMCORDER_FACE_DETECT_INFO,		/**< Face detection information */
+	MM_MESSAGE_CAMCORDER_VIDEO_CAPTURED,		/**< Video captured */
+	MM_MESSAGE_CAMCORDER_AUDIO_CAPTURED,		/**< Audio captured */
+	MM_MESSAGE_CAMCORDER_LOW_LIGHT_STATE,		/**< Low light state */
+	MM_MESSAGE_CAMCORDER_CAPTURE_SOUND,		/**< Noti to play capture sound - only single capture available */
+	MM_MESSAGE_CAMCORDER_CAPTURE_SOUND_COMPLETED,	/**< Noti to play capture sound completed - only single capture available */
 
 	/* RADIO */
 	MM_MESSAGE_RADIO_SCAN_START = 0x300,		/**< Radio frequency scanning initiated */
 	MM_MESSAGE_RADIO_SCAN_INFO,			/**< Founded radio frequency report. check message parameters  */
-	MM_MESSAGE_RADIO_SCAN_FINISH, 			/**< Radio frequency scanning has finished */
+	MM_MESSAGE_RADIO_SCAN_FINISH,			/**< Radio frequency scanning has finished */
 	MM_MESSAGE_RADIO_SCAN_STOP,			/**< Radio frequency scanning has stopped */
 	MM_MESSAGE_RADIO_SEEK_START,			/**< Radio seeking has established */
-	MM_MESSAGE_RADIO_SEEK_FINISH, 			/**< Radio seeking has finished */
+	MM_MESSAGE_RADIO_SEEK_FINISH,			/**< Radio seeking has finished */
+	MM_MESSAGE_RADIO_SET_FREQUENCY,			/**< Radio set frequency async*/
+	MM_MESSAGE_RADIO_RDS_PS,			/**< Radio RDS Program Service Data has arrived> */
+	MM_MESSAGE_RADIO_RDS_RT,			/**< Radio RDS Radio Text Data has arrived> */
+
 
 	/* MEDIA CALL */
 	MM_MESSAGE_MEDIACALL_RESERVED = 0x400,		/**< Reserved message for Media Call */
@@ -112,6 +125,11 @@ enum MMMessageType {
 
 	/* FILE INFO */
 	MM_MESSAGE_FILEINFO_RESERVED = 0x700,		/**< Reserved message for File Info */
+
+	/* STREAM RECORDER */
+	MM_MESSAGE_STREAMRECORDER_ERROR 			= 0x800,
+	MM_MESSAGE_STREAMRECORDER_CONSUME_COMPLETE,
+	MM_MESSAGE_STREAMRECORDER_STATE_CHANGED,
 
 	MM_MESSAGE_NUM,					/**< The number of the messages */
 };
@@ -133,19 +151,27 @@ enum MMMessageUnionType {
 	MM_MSG_UNION_RADIO_SCAN,
 	MM_MSG_UNION_RECORDING_STATUS,
 	MM_MSG_UNION_REC_VOLUME_DB,
+	MM_MSG_UNION_CONSUME_RECORDER_BUFFER,
 };
 
 /*
  * Enumerations of code for MM_MESSAGE_STATE_INTERRUPTED messages type.
  */
 enum MMMessageInterruptedCode {
-	MM_MSG_CODE_INTERRUPTED_BY_OTHER_APP = 0,
+	MM_MSG_CODE_INTERRUPTED_BY_MEDIA = 0,
 	MM_MSG_CODE_INTERRUPTED_BY_CALL_START,
 	MM_MSG_CODE_INTERRUPTED_BY_CALL_END,
 	MM_MSG_CODE_INTERRUPTED_BY_EARJACK_UNPLUG,
 	MM_MSG_CODE_INTERRUPTED_BY_RESOURCE_CONFLICT,
 	MM_MSG_CODE_INTERRUPTED_BY_ALARM_START,
 	MM_MSG_CODE_INTERRUPTED_BY_ALARM_END,
+	MM_MSG_CODE_INTERRUPTED_BY_EMERGENCY_START,
+	MM_MSG_CODE_INTERRUPTED_BY_EMERGENCY_END,
+	MM_MSG_CODE_INTERRUPTED_BY_OTHER_PLAYER_APP,
+	MM_MSG_CODE_INTERRUPTED_BY_RESUMABLE_MEDIA,
+	MM_MSG_CODE_INTERRUPTED_BY_NOTIFICATION_START,
+	MM_MSG_CODE_INTERRUPTED_BY_NOTIFICATION_END,
+	MM_MSG_CODE_INTERRUPTED_BY_RESUMABLE_CANCELED,
 };
 
 /*
@@ -253,22 +279,44 @@ typedef struct {
 		struct {
 			int frequency;                  /**< detected active frequency with MM_MESSAGE_RADIO_SCAN_INFO */
 		} radio_scan;
+
+/**
+ * Radio RDS PS and RT Info
+ */
+		struct {
+			int frequency;                /**< The frequency at which the RDS data was obtained> */
+			char* rt_ps;                  /**< the radio text obtained with MM_MESSAGE_RADIO_RDS_PS and MM_MESSAGE_RADIO_RDS_RT */
+		} radio_rds_text;
 /**
  * Recording status
  */
 		struct {
-			unsigned int elapsed;           /**< Elapsed time (ms) */
-			unsigned int total;             /**< Total time */
-			unsigned int filesize;          /**< Recording File size (KB). An approximate value. */
-			unsigned int remained_time;     /**< Remained time (ms).
-			                                     This is available if time limit is not set or
-			                                     time limit is bigger than estimated remained time. */
+			unsigned long long elapsed;          /**< Elapsed time (ms) */
+			unsigned long long total;            /**< Total time */
+			unsigned long long filesize;         /**< Recording File size (KB). An approximate value. */
+			unsigned long long remained_time;    /**< Remained time (ms).
+			                                          This is available if time limit is not set or
+			                                          time limit is bigger than estimated remained time. */
 		} recording_status;
 
 /**
  * Recording volume level - dB
  */
 		float rec_volume_dB;
+
+		struct {
+			void * consumed_buffer;
+
+		} consumed_mediabuffer;
+
+	/**
+	 * Video frame capture
+	 */
+		struct {
+			unsigned int width; 					/* width of captured image */
+			unsigned int height;					/* height of captured image */
+			unsigned int orientation;				/* orientation of captured image */
+		} captured_frame;
 	};
 
 	int size;       /**< Allocated size of 'data' */

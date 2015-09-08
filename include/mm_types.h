@@ -18,7 +18,7 @@
  * limitations under the License.
  *
  */
- 
+
 /**
  * This file declares common data structure of multimedia framework.
  *
@@ -78,19 +78,21 @@ enum MMVideoDeviceType {
 enum MMAudioDeviceType {
 	MM_AUDIO_DEVICE_MIC,	/**< Mic device */
 	MM_AUDIO_DEVICE_MODEM,	/**< Modem */
+	MM_AUDIO_DEVICE_RADIO,	/**< Radio */
 	MM_AUDIO_DEVICE_NUM,	/**< Number of audio capture devices */
 };
 
 /**
  * Enumerations of display surfaces.
  */
-enum MMDisplaySurfaceType {
+typedef enum {
 	MM_DISPLAY_SURFACE_X,                  /**< X surface - default */
 	MM_DISPLAY_SURFACE_EVAS,               /**< Evas object surface */
 	MM_DISPLAY_SURFACE_GL,                 /**< GL surface */
 	MM_DISPLAY_SURFACE_NULL,               /**< This just disposes of buffers */
+	MM_DISPLAY_SURFACE_X_EXT,              /**< X extension surface - for OSP videotexture(using multi-xpixmap) */
 	MM_DISPLAY_SURFACE_NUM,                /**< number of enum */
-};
+} MMDisplaySurfaceType;
 
 /**
  * Enumerations of display modes.
@@ -164,9 +166,30 @@ enum MMSoftwareVolumeTableType {
 	MM_SOUND_VOLUME_TYPE_RINGTONE,		/**< Volume table for Ringtone */
 	MM_SOUND_VOLUME_TYPE_MEDIA,			/**< Volume table for Multimedia */
 	MM_SOUND_VOLUME_TYPE_CALL,			/**< Volume table for Call */
+	MM_SOUND_VOLUME_TYPE_VOIP,			/**< Volume table for VOIP */
+	MM_SOUND_VOLUME_TYPE_VOICE,			/**< Volume table for VOICE */
+	MM_SOUND_VOLUME_TYPE_SVOICE,			/**< Volume table for SVOICE */
 	MM_SOUND_VOLUME_TYPE_EMERGENCY,		/**< Volume table for Emergency (FIXED) */
 	MM_SOUND_VOLUME_TYPE_NUM,
 	MM_SOUND_VOLUME_TABLE_NUM = MM_SOUND_VOLUME_TYPE_NUM,
+};
+
+/*
+ * Enumerations of SW Volume Gain.
+ */
+enum MMSoftwareVolumeGainType {
+	MM_SOUND_VOLUME_GAIN_DEFAULT	= 0,		/**< Volume gain for Default */
+	MM_SOUND_VOLUME_GAIN_DIALER		= 1<<8,		/**< Volume gain for Dialer */
+	MM_SOUND_VOLUME_GAIN_TOUCH		= 2<<8,		/**< Volume gain for Touch */
+	MM_SOUND_VOLUME_GAIN_AF			= 3<<8,		/**< Volume gain for AF */
+	MM_SOUND_VOLUME_GAIN_SHUTTER1	= 4<<8,		/**< Volume gain for Shutter1 */
+	MM_SOUND_VOLUME_GAIN_SHUTTER2	= 5<<8,		/**< Volume gain for Shutter2 */
+	MM_SOUND_VOLUME_GAIN_CAMCORDING	= 6<<8,		/**< Volume gain for Camcording */
+	MM_SOUND_VOLUME_GAIN_MIDI		= 7<<8,		/**< Volume gain for Midi */
+	MM_SOUND_VOLUME_GAIN_BOOTING	= 8<<8,		/**< Volume gain for Booting */
+	MM_SOUND_VOLUME_GAIN_VIDEO		= 9<<8,		/**< Volume gain for Video */
+	MM_SOUND_VOLUME_GAIN_TTS		= 10<<8,	/**< Volume gain for TTS */
+	MM_SOUND_VOLUME_GAIN_NUM
 };
 
 #define MM_SOUND_PRIORITY_ALLOW_MIX	(0x80) /**< This define has deprecated */
@@ -216,6 +239,7 @@ enum MMVideoCodecType {
 	MM_VIDEO_CODEC_CINEPAK,				/**< Cinepak video	codec							*/
 	MM_VIDEO_CODEC_INDEO,				/**< Indeo video	codec							*/
 	MM_VIDEO_CODEC_THEORA,				/**< Theora video	codec							*/
+	MM_VIDEO_CODEC_FLV,					/**< Adobe Flash Video	codec						*/
 	MM_VIDEO_CODEC_NUM,			/**< Number of video codec type	*/
 };
 
@@ -268,6 +292,7 @@ enum MMAudioCodecType {
 	MM_AUDIO_CODEC_ALAW,			/**< ALAW codec */
 	MM_AUDIO_CODEC_MULAW,			/**< MULAW codec */
 	MM_AUDIO_CODEC_MS_ADPCM,	/**< MS ADPCM codec */
+	MM_AUDIO_CODEC_FLAC,			/**< Free Lossless audio codec				*/
 	MM_AUDIO_CODEC_NUM,			/**< Number of audio codec type	*/
 };
 
@@ -322,6 +347,7 @@ enum MMFileFormatType {
         MM_FILE_FORMAT_WMA,             /**< WMA file format */
         MM_FILE_FORMAT_WMV,             /**< WMV file format */
         MM_FILE_FORMAT_JPG,             /**< JPEG file format */
+        MM_FILE_FORMAT_FLAC,				/**< FLAC file format */
         MM_FILE_FORMAT_NUM,             /**< Number of file format type */
 };
 
@@ -365,8 +391,6 @@ typedef enum {
 	MM_VIDEO_INPUT_ROTATION_90,		/**< 90 degree rotation */
 	MM_VIDEO_INPUT_ROTATION_180,	/**< 180 degree rotation */
 	MM_VIDEO_INPUT_ROTATION_270,	/**< 270 degree rotation */
-	MM_VIDEO_INPUT_ROTATION_FLIP_HORZ,	/**< flip horizontally */
-	MM_VIDEO_INPUT_ROTATION_FLIP_VERT,	/**< flip vertically */
 	MM_VIDEO_INPUT_ROTATION_NUM		/**< Number of the rotation */
 } MMVideoInputRotationType;
 
@@ -378,10 +402,19 @@ typedef enum {
 	MM_DISPLAY_ROTATION_90,		/**< 90 degree rotation */
 	MM_DISPLAY_ROTATION_180,	/**< 180 degree rotation */
 	MM_DISPLAY_ROTATION_270,	/**< 270 degree rotation */
-	MM_DISPLAY_ROTATION_FLIP_HORZ,	/**< flip horizontally */
-	MM_DISPLAY_ROTATION_FLIP_VERT,	/**< flip vertically */
 	MM_DISPLAY_ROTATION_NUM		/**< Number of the rotation */
 } MMDisplayRotationType;
+
+/**
+ * Enumerations of flip type.
+ */
+typedef enum {
+	MM_FLIP_NONE,                   /**< No Flip */
+	MM_FLIP_HORIZONTAL,             /**< Horizontal flip */
+	MM_FLIP_VERTICAL,               /**< Vertical flip */
+	MM_FLIP_BOTH,                   /**< Horizontal and Vertical flip */
+	MM_FLIP_NUM                     /**< Number of flip */
+} MMFlipType;
 
 /**
  * Enumerations of streaming type.
@@ -449,10 +482,19 @@ enum MMAudioRoutePolicy {
 typedef enum  {
 	MM_DISPLAY_METHOD_LETTER_BOX = 0,
 	MM_DISPLAY_METHOD_ORIGIN_SIZE,
-	MM_DISPLAY_METHOD_FULL_SCREEN,	
+	MM_DISPLAY_METHOD_FULL_SCREEN,
 	MM_DISPLAY_METHOD_CROPPED_FULL,
+	MM_DISPLAY_METHOD_ORIGIN_OR_LETTER,
 	MM_DISPLAY_METHOD_CUSTOM_ROI,
 }MMDisplayGeometryMethod;
+
+/*
+ * Enumerations of ROI mode of display geometry method
+ */
+typedef enum  {
+	MM_DISPLAY_METHOD_CUSTOM_ROI_FULL_SCREEN = 0,
+	MM_DISPLAY_METHOD_CUSTOM_ROI_LETER_BOX
+}MMDisplayGeometryMethodRoiMode;
 
 #ifdef __cplusplus
 	}

@@ -19,7 +19,7 @@
  *
  */
 
- 
+
 
 #include <stdio.h>
 #include <string.h>
@@ -50,8 +50,15 @@ int mmf_value_copy(mmf_value_t *dest, const mmf_value_t *src)
 		dest->value.d_val = src->value.d_val;
 		break;
 	case MM_ATTRS_TYPE_STRING:
-		dest->value.s_val = strdup(src->value.s_val);
-		dest->size = src->size;
+		if (dest->value.s_val) {
+			free(dest->value.s_val);
+			dest->value.s_val = NULL;
+			dest->size = 0;
+		}
+		if (src->value.s_val) {
+			dest->value.s_val = strdup(src->value.s_val);
+			dest->size = src->size;
+		}
 		break;
 	case MM_ATTRS_TYPE_DATA:
 		dest->value.p_val = src->value.p_val;
@@ -135,19 +142,19 @@ void mmf_value_dump(const mmf_value_t *value)
 	return_if_fail(value);
 	switch (value->type) {
 	case MMF_VALUE_TYPE_INT:
-		mmf_debug(MMF_DEBUG_LOG, "value[int]: %d\n", value->value.i_val);
+		//mmf_debug(MMF_DEBUG_LOG, "value[int]: %d\n", value->value.i_val);
 		break;
 	case MMF_VALUE_TYPE_DOUBLE:
-		mmf_debug(MMF_DEBUG_LOG, "value[double]: %f\n", value->value.d_val);
+		//mmf_debug(MMF_DEBUG_LOG, "value[double]: %f\n", value->value.d_val);
 		break;
 	case MMF_VALUE_TYPE_STRING:
-		mmf_debug(MMF_DEBUG_LOG, "value[string]: %s\n", value->value.s_val);
+		//mmf_debug(MMF_DEBUG_LOG, "value[string]: %s\n", value->value.s_val);
 		break;
 	case MMF_VALUE_TYPE_DATA:
-		mmf_debug(MMF_DEBUG_LOG, "value[data]: %p\n", value->value.p_val);
+		//mmf_debug(MMF_DEBUG_LOG, "value[data]: %p\n", value->value.p_val);
 		break;
 	default:
-		mmf_debug(MMF_DEBUG_LOG, "value invalid!!\n");
+		//mmf_debug(MMF_DEBUG_LOG, "value invalid!!\n");
 		break;
 	}
 }
@@ -331,16 +338,16 @@ bool mmf_attribute_validate_int(mmf_attribute_t *item, int val)
 {
 	return_val_if_fail(item, false);
 	return_val_if_fail(item->value.type == MMF_VALUE_TYPE_INT, false);
-	
+
 	bool valid = true;
 	int i = 0;
-	
+
 	switch (item->value_spec.type) {
 	case MMF_VALUE_SPEC_INT_RANGE:
-		if (val < item->value_spec.spec.int_spec.range.min || 
+		if (val < item->value_spec.spec.int_spec.range.min ||
 				val > item->value_spec.spec.int_spec.range.max) {
 			valid = false;
-			mmf_debug(MMF_DEBUG_LOG, "[mmf_attribute:%s] out of range\n", item->name);
+			//mmf_debug(MMF_DEBUG_LOG, "[mmf_attribute:%s] out of range\n", item->name);
 		}
 		break;
 	case MMF_VALUE_SPEC_INT_ARRAY:
@@ -352,13 +359,13 @@ bool mmf_attribute_validate_int(mmf_attribute_t *item, int val)
 			}
 		}
 		if (!valid) {
-			mmf_debug(MMF_DEBUG_LOG, "[mmf_attribute:%s] out of array\n", item->name);
+			//mmf_debug(MMF_DEBUG_LOG, "[mmf_attribute:%s] out of array\n", item->name);
 		}
 		break;
 	default:
-		break;		
+		break;
 	}
-	
+
 	return valid;
 }
 
@@ -366,16 +373,16 @@ bool mmf_attribute_validate_double(mmf_attribute_t *item, double val)
 {
 	return_val_if_fail(item, false);
 	return_val_if_fail(item->value.type == MMF_VALUE_TYPE_DOUBLE, false);
-	
+
 	bool valid = true;
 	int i = 0;
-	
+
 	switch (item->value_spec.type) {
 	case MMF_VALUE_SPEC_DOUBLE_RANGE:
-		if (val < item->value_spec.spec.double_spec.range.min || 
+		if (val < item->value_spec.spec.double_spec.range.min ||
 				val > item->value_spec.spec.double_spec.range.max) {
 			valid = false;
-			mmf_debug(MMF_DEBUG_LOG, "[mmf_attribute:%s] out of range\n", item->name);
+			//mmf_debug(MMF_DEBUG_LOG, "[mmf_attribute:%s] out of range\n", item->name);
 		}
 		break;
 	case MMF_VALUE_SPEC_DOUBLE_ARRAY:
@@ -387,13 +394,13 @@ bool mmf_attribute_validate_double(mmf_attribute_t *item, double val)
 			}
 		}
 		if (!valid) {
-			mmf_debug(MMF_DEBUG_LOG, "[mmf_attribute:%s] out of array\n", item->name);
+			//mmf_debug(MMF_DEBUG_LOG, "[mmf_attribute:%s] out of array\n", item->name);
 		}
 		break;
 	default:
-		break;		
+		break;
 	}
-	
+
 	return valid;
 }
 
@@ -478,9 +485,9 @@ int mmf_attribute_set_string(mmf_attribute_t *item, const char *string, int size
 	return_val_if_fail(item, -1);
 
 	if (mmf_value_set_string(&item->tmpval, string,size) == 0) {
-		if (string) 
-			item->flags |= MM_ATTRS_FLAG_MODIFIED; 
-		
+		if (string)
+			item->flags |= MM_ATTRS_FLAG_MODIFIED;
+
 		return 0;
 	}
 	return -1;
@@ -502,9 +509,37 @@ MMHandleType mmf_attrs_new(int count)
 	return_val_if_fail(count > 0, 0);
 	mmf_attrs_t *attrs;
 	attrs = (mmf_attrs_t *) malloc (sizeof(mmf_attrs_t));
+
+	if (attrs == NULL) {
+		debug_error("malloc failed");
+		return 0;
+	}
+
 	attrs->count = count;
 	attrs->items = (mmf_attribute_t *) malloc (sizeof(mmf_attribute_t) * count);
-	memset(attrs->items, 0, sizeof(sizeof(mmf_attribute_t) * count));
+
+	if(attrs->items == NULL) {
+		debug_error("Failed to malloc for attrs->items.");
+		free(attrs);
+		attrs=NULL;
+		return 0;
+	}
+
+	memset(attrs->items, 0, sizeof(mmf_attribute_t) * count);
+
+	if (pthread_mutex_init(&attrs->write_lock, NULL) != 0) {
+		//mmf_debug(MMF_DEBUG_ERROR, "mutex init failed");
+		if (attrs) {
+			if (attrs->items) {
+				free(attrs->items);
+				attrs->items = NULL;
+			}
+			free(attrs);
+			attrs=NULL;
+		}
+		return 0;
+	}
+
 	return (MMHandleType) attrs;
 }
 
@@ -519,6 +554,9 @@ MMHandleType mmf_attrs_new_from_data(const char *name,
 	mmf_attrs_t *attrs;
 
 	h = mmf_attrs_new(count);
+	if(!h) {
+		return 0;
+	}
 	mmf_attrs_init(h, info, count);
 	attrs = (mmf_attrs_t *) h;
 	attrs->name = NULL;
@@ -546,6 +584,7 @@ void mmf_attrs_free(MMHandleType h)
 			free(attrs->items);
 			attrs->items = NULL;
 		}
+		pthread_mutex_destroy(&attrs->write_lock);
 		free(attrs);
 	}
 }
@@ -593,7 +632,7 @@ int mmf_attrs_init(MMHandleType h, mmf_attrs_construct_info_t *info, int count)
 			mmf_value_set_data(&attrs->items[i].value, info[i].default_value,size);
 			break;
 		default:
-			mmf_debug(MMF_DEBUG_LOG, "ERROR: Invalid MMF_VALUE_TYPE\n");
+			//mmf_debug(MMF_DEBUG_LOG, "ERROR: Invalid MMF_VALUE_TYPE\n");
 			assert(0);
 			break;
 		}
@@ -605,10 +644,12 @@ int mmf_attrs_init(MMHandleType h, mmf_attrs_construct_info_t *info, int count)
 int mmf_attrs_commit(MMHandleType h)
 {
 	return_val_if_fail(h, -1);
-	
+
 	mmf_attrs_t *attrs = (mmf_attrs_t * )h;
 	int i;
 	int ret = 0;
+
+	MM_ATTRS_WRITE_LOCK(attrs);
 
 	for (i = 0; i < attrs->count; ++i) {
 		if (mmf_attribute_is_modified(&attrs->items[i])) {
@@ -628,6 +669,9 @@ int mmf_attrs_commit(MMHandleType h)
 			}
 		}
 	}
+
+	MM_ATTRS_WRITE_UNLOCK(attrs);
+
 	return ret;
 }
 
@@ -638,6 +682,8 @@ int mmf_attrs_commit_err(MMHandleType h, char **err_attr_name)
 	int ret = 0;
 
 	return_val_if_fail(h, -1);
+
+	MM_ATTRS_WRITE_LOCK(attrs);
 
 	for (i = 0; i < attrs->count; ++i) {
 		if (mmf_attribute_is_modified(&attrs->items[i])) {
@@ -663,6 +709,9 @@ int mmf_attrs_commit_err(MMHandleType h, char **err_attr_name)
 			}
 		}
 	}
+
+	MM_ATTRS_WRITE_UNLOCK(attrs);
+
 	return ret;
 }
 
@@ -713,4 +762,3 @@ int mmf_attrs_set_valid_double_array(MMHandleType h, int idx, const double *arra
 	assert(attrs->items[idx].value_spec.type == MMF_VALUE_SPEC_DOUBLE_ARRAY);
 	return mmf_value_spec_set_double_array(&attrs->items[idx].value_spec, array, count, dval);
 }
-

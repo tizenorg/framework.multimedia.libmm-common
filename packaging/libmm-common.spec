@@ -1,6 +1,6 @@
 Name:       libmm-common
 Summary:    Multimedia Framework Common Lib
-Version:    0.2.38
+Version:    0.2.86
 Release:    0
 Group:      TO_BE/FILLED_IN
 License:    Apache-2.0
@@ -29,7 +29,7 @@ Multimedia Framework Common Library (devel)
 CFLAGS="%{optflags} -DEXPORT_API=\"__attribute__((visibility(\\\"default\\\")))\" " ./configure --prefix=%{_prefix} ; export CFLAGS
 
 %build
-
+export CFLAGS+=" -Wall -Wcast-align -Wcast-qual -Wextra -Wno-array-bounds -Wno-empty-body -Wno-ignored-qualifiers -Wno-unused-parameter -Wshadow -Wwrite-strings -Wswitch-default -Wno-unused-but-set-parameter -Wno-unused-but-set-variable"
 
 make %{?jobs:-j%jobs}
 
@@ -44,6 +44,7 @@ rm -rf %{buildroot}
 
 
 %files
+%manifest libmm-common.manifest
 %defattr(-,root,root,-)
 %{_libdir}/libmmfcommon.so.*
 
