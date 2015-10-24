@@ -19,7 +19,7 @@
  *
  */
 
-
+ 
 
 #include <stdio.h>
 #include <string.h>
@@ -338,13 +338,13 @@ bool mmf_attribute_validate_int(mmf_attribute_t *item, int val)
 {
 	return_val_if_fail(item, false);
 	return_val_if_fail(item->value.type == MMF_VALUE_TYPE_INT, false);
-
+	
 	bool valid = true;
 	int i = 0;
-
+	
 	switch (item->value_spec.type) {
 	case MMF_VALUE_SPEC_INT_RANGE:
-		if (val < item->value_spec.spec.int_spec.range.min ||
+		if (val < item->value_spec.spec.int_spec.range.min || 
 				val > item->value_spec.spec.int_spec.range.max) {
 			valid = false;
 			//mmf_debug(MMF_DEBUG_LOG, "[mmf_attribute:%s] out of range\n", item->name);
@@ -363,9 +363,9 @@ bool mmf_attribute_validate_int(mmf_attribute_t *item, int val)
 		}
 		break;
 	default:
-		break;
+		break;		
 	}
-
+	
 	return valid;
 }
 
@@ -373,13 +373,13 @@ bool mmf_attribute_validate_double(mmf_attribute_t *item, double val)
 {
 	return_val_if_fail(item, false);
 	return_val_if_fail(item->value.type == MMF_VALUE_TYPE_DOUBLE, false);
-
+	
 	bool valid = true;
 	int i = 0;
-
+	
 	switch (item->value_spec.type) {
 	case MMF_VALUE_SPEC_DOUBLE_RANGE:
-		if (val < item->value_spec.spec.double_spec.range.min ||
+		if (val < item->value_spec.spec.double_spec.range.min || 
 				val > item->value_spec.spec.double_spec.range.max) {
 			valid = false;
 			//mmf_debug(MMF_DEBUG_LOG, "[mmf_attribute:%s] out of range\n", item->name);
@@ -398,9 +398,9 @@ bool mmf_attribute_validate_double(mmf_attribute_t *item, double val)
 		}
 		break;
 	default:
-		break;
+		break;		
 	}
-
+	
 	return valid;
 }
 
@@ -485,9 +485,9 @@ int mmf_attribute_set_string(mmf_attribute_t *item, const char *string, int size
 	return_val_if_fail(item, -1);
 
 	if (mmf_value_set_string(&item->tmpval, string,size) == 0) {
-		if (string)
-			item->flags |= MM_ATTRS_FLAG_MODIFIED;
-
+		if (string) 
+			item->flags |= MM_ATTRS_FLAG_MODIFIED; 
+		
 		return 0;
 	}
 	return -1;
@@ -517,13 +517,12 @@ MMHandleType mmf_attrs_new(int count)
 
 	attrs->count = count;
 	attrs->items = (mmf_attribute_t *) malloc (sizeof(mmf_attribute_t) * count);
-
 	if(attrs->items == NULL) {
-		debug_error("Failed to malloc for attrs->items.");
-		free(attrs);
-		attrs=NULL;
-		return 0;
-	}
+                debug_error("Failed to malloc for attrs->items.");
+                free(attrs);
+                attrs=NULL;
+                return 0;
+        }
 
 	memset(attrs->items, 0, sizeof(mmf_attribute_t) * count);
 
@@ -644,7 +643,7 @@ int mmf_attrs_init(MMHandleType h, mmf_attrs_construct_info_t *info, int count)
 int mmf_attrs_commit(MMHandleType h)
 {
 	return_val_if_fail(h, -1);
-
+	
 	mmf_attrs_t *attrs = (mmf_attrs_t * )h;
 	int i;
 	int ret = 0;
